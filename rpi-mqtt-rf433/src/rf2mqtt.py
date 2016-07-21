@@ -8,11 +8,10 @@ __license__ = 'GPL v3'
 import getopt
 import logging
 import os
-import paho.mqtt.client as mqtt
-import RPi.GPIO as io
 import signal
 import sys
 import time
+import paho.mqtt.client as mqtt
 from libs.rfsniffer import RFSniffer
 
 client = mqtt.Client()
@@ -48,21 +47,17 @@ def connect():
     Connect to the MQTT broker and subscribe to topic
     """
     rc = client.connect(mqttHost, mqttPort, 60)
-    if rc != 0:
-        logger.info("Connection failed with error code %s. Retrying", result)
-        time.sleep(10)
-        connect()
-        sniffer = RFSniffer(client, mqttPubTopic, logLevel)
-        sniffer.start()
-        client.loop_forever()
 
+    if rc != 0:
+        return False
+    
     # On message / On connect / On disconnect
     client.on_message = on_message
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
 
-    client.subscribe(mqttSubTopic, 2)
-
+    return True
+    
 def on_connect(client, userdata, flags, rc):
      """
      Connection to the broker
@@ -151,10 +146,12 @@ def main(argv):
     print " - Publish to topic       : %s" % mqttPubTopic
     print " - Subscribe to topic     : %s" % mqttSubTopic
 
-    connect()
-    sniffer = RFSniffer(client, mqttPubTopic, logLevel)
-    sniffer.start()
-    client.loop_forever()
+    if connect():
+        sniffer = RFSniffer(client, mqttPubTopic, logLevel)
+        sniffer.start()
+        client.loop_forever()
+    else:
+        sys.exit()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

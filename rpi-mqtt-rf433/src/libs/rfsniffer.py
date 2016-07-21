@@ -6,7 +6,6 @@ import threading
 import logging 
 import subprocess 
 import time 
-import paho.mqtt.client as mqtt
   
 class RFSniffer(threading.Thread): 
     def __init__(self, mqttClient, mqttTopic = '/rpi/rf433/out', logLevel = logging.DEBUG): 
