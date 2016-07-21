@@ -23,10 +23,16 @@ class RFSniffer(threading.Thread):
             proc = subprocess.Popen(["sudo", "/usr/local/bin/RFSniffer"],
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
+            lastSendTime = 0.0
             for line in iter(proc.stdout.readline,''):
-                # The RF receiver has received an incoming signal.
-                rfcode = line.rstrip()
-                self.client.publish(self.mqttTopic, rfcode)
-                self.logger.log(logging.DEBUG, "Publishing [%s] to topic [%s]" % (rfcode, self.mqttTopic))
+                currentTime = time.time()
+                delta = currentTime - lastSendTime
+                if delta > 1.0:
+                    # The RF receiver has received an incoming signal.
+                    rfcode = line.rstrip()
+                    self.client.publish(self.mqttTopic, rfcode)
+                    self.logger.log(logging.DEBUG, "Publishing [%s] to topic [%s]" % (rfcode, self.mqttTopic))
+                    lastSendTime = currentTime
+
     def stop(self): 
         self._stopevent.set()
