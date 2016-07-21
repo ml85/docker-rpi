@@ -31,7 +31,7 @@ RUN mkdir /root/rf433 && cd /root/rf433 && \
     unzip master.zip && cd 433Utils-master/RPi_utils && \
     make install && rm -rf /root/rf433
 
-RUN pip install paho-mqtt RPi.GPIO
+RUN pip install paho-mqtt
 
 # Add custom program
 COPY src/rf2mqtt.py /app/rf2mqtt.py
